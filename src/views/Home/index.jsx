@@ -118,8 +118,8 @@ export default class Home extends React.Component {
   render() {
     return (
       <div className={styles.box}>
-        <div className={styles.header} onDoubleClick={this.changeUsername.bind(this)}>
-          <div className={styles.show}>{this.state.username}</div>
+        <div className={styles.header}>
+          <div className={styles.show}><span onClick={this.changeUsername.bind(this)}>{this.state.username}</span></div>
         </div>
         <div className={styles.content} ref={(el) => { this.messagesEnd = el; }}>
           {this.state.chats.map((chat) => {

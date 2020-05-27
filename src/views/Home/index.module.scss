@@ -16,6 +16,10 @@
     color: rgba(204, 204, 204, 1);
     display: inline-block;
     padding-left: 30px;
+
+    span:hover {
+      cursor: pointer;
+    }
   }
 }
 

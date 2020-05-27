@@ -12,7 +12,7 @@ module.exports = function (app) {
     // );
     app.use(
         createProxyMiddleware("/stomp-websocket", {
-            target: "http://localhost:18083",
+            target: "http://36.153.0.228:661",
             changeOrigin: true,
             ws: true,
         })
