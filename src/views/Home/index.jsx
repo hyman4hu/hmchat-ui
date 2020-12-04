@@ -26,6 +26,11 @@ export default class Home extends React.Component {
     //     msg: 'this.state.textareaValue'
     //   });
     // }, 5000);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") {
+        document.title = "H&M Chat";
+      }
+    });
   }
 
   init() {
@@ -50,7 +55,7 @@ export default class Home extends React.Component {
       this.setState({
         chats,
       });
-      this.notify(msg);
+      this.notify();
     }
     this.scrollToBottom();
     this.storeData();
@@ -78,23 +83,9 @@ export default class Home extends React.Component {
     this.storeData();
   }
 
-  notify(msg) {
-    if (!("Notification" in window)) {
-      console.warn("你的浏览器不支持Notification");
-      return;
-    }
-    let options = {
-      body: msg.msg,
-    };
-    //检查是否拥有通知权限；有就通知，没有请求；
-    if (Notification.permission === "granted") {
-      new Notification(msg.username, options);
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(function (result) {
-        if (result === "granted") {
-          new Notification(msg.username, options);
-        }
-      });
+  notify() {
+    if (document.visibilityState === "hidden") {
+      document.title = "新消息";
     }
   }
 

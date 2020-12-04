@@ -17,13 +17,13 @@ export default class WebSocketService {
   connect(callback) {
     console.log("websocket尝试连接");
     this.stompClient = new Client({
-      brokerURL: "ws://" + window.location.host + "/stomp-websocket",
+      brokerURL: "wss://" + window.location.host + "/stomp-websocket",
       // connectHeaders: {
       //   login: "user",
       //   passcode: "password",
       // },
       debug: function (str) {
-        console.log(str);
+        // console.log(str);
       },
       // reconnectDelay: 5000,
       // heartbeatIncoming: 4000,
