@@ -1,0 +1,14 @@
+* {
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+}
+:after, :before {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+    height: 100%;
+}
