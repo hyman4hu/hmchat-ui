@@ -6,7 +6,7 @@
             <span class="online" :title="onlineUserTipContent">在线人数 {{ onlineNum }}</span>
         </div>
         <div class="msg-list-box" ref="msgListBox">
-            <div class="msg-item" :class="{mine: item.mineFlag}" v-for="(item, index) in chatMsgList" :key="`msgbox-${index}`">
+            <div class="msg-item" :class="{mine: isMyMsg(item) }" v-for="(item, index) in chatMsgList" :key="`msgbox-${index}`">
                 <div class="avatar-box">
                     {{getFullNameFirst(item)}}
                 </div>
@@ -38,6 +38,7 @@ import smileSvg from "@/assets/icon/smile.svg";
 import folderSvg from "@/assets/icon/folder.svg";
 import WsService from "./WsService";
 import * as dayjs from 'dayjs';
+import axios from "@/common/axios.js";
 
 export default {
     name: "HomeView",
@@ -54,25 +55,25 @@ export default {
                 userId: "",
             },
             chatMsgInput: "",
-            chatMsgList: undefined,
+            chatMsgList: [],
             onlineNum: 1,
-            clientInfos: []
+            userInfos: []
         }
     },
     computed: {
         onlineUserTipContent() {
             let ret = "";
-            let length = this.clientInfos.length;
+            let length = this.userInfos.length;
             if (length == 0) {
                 return undefined;
             } else {
-                ret += this.clientInfos[0].clientName;
+                ret += this.userInfos[0].fullName;
             }
             if (length == 1) {
                 return ret;
             }
             for(let i=1; i< length; i++) {
-                ret += "\n" + this.clientInfos[i].clientName;
+                ret += "\n" + this.userInfos[i].fullName;
             }
             return ret;
         }
@@ -82,6 +83,7 @@ export default {
         this.initData();
         this.initWebSocket();
         new PerfectScrollbar(this.$refs.msgListBox);
+        Notification.requestPermission();
     },
     methods: {
         initData() {
@@ -96,25 +98,35 @@ export default {
                 }
                 localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
             }
-            let chatMsgListStr = localStorage.getItem("chatMsgList");
-            let chatMsgList = JSON.parse(chatMsgListStr);
-            if (!chatMsgList) {
-                chatMsgList = [];
-            }
-            this.chatMsgList = chatMsgList;
+            // let chatMsgListStr = localStorage.getItem("chatMsgList");
+            // let chatMsgList = JSON.parse(chatMsgListStr);
+            // if (!chatMsgList) {
+            //     chatMsgList = [];
+            // }
+            // this.chatMsgList = chatMsgList;
+            axios({
+                url: "/chat/allmsgs",
+                method: "get",
+            }).then(res => {
+                this.chatMsgList = res.data.data;
+            });
         },
         initWebSocket() {
             WsService.init({
-                clientId: this.userInfo.userId,
-                clientName: this.userInfo.fullName,
+                userId: this.userInfo.userId,
+                fullName: this.userInfo.fullName,
                 subscribes: [{
-                    topic: `/user/${this.userInfo.userId}/msg`,
+                    // topic: `/user/${this.userInfo.userId}/msg`,
+                    topic: `/topic/msg`,
                     callback: this.receiveMsgCallback
                 }, {
-                    topic: "/topic/clientInfos",
-                    callback: this.receiveClientInfosCallback
+                    topic: "/topic/userInfos",
+                    callback: this.receiveUserInfosCallback
                 }]
             });
+            setInterval(() => {
+                WsService.heartbeat(this.userInfo.userId, this.userInfo.fullName);
+            }, 10000);
         },
         
         onFullNameClick() {
@@ -163,32 +175,31 @@ export default {
                 datetime: dayjs().format('YYYY-MM-DD HH:mm:ss')
             }
             WsService.sendMsg(msg);
-            this.chatMsgList.push({
-                ...msg,
-                mineFlag: true
-            });
             this.chatMsgInput = "";
-            let limit = 5;
-            let length = this.chatMsgList.length;
-            if (length > limit) {
-                this.chatMsgList = this.chatMsgList.slice(length - limit, length);
-            }
-            localStorage.setItem("chatMsgList", JSON.stringify(this.chatMsgList));
-            this.$nextTick(() => {
-                this.$refs.msgListBox.scrollTop = this.$refs.msgListBox.scrollHeight;
-            });
         },
         receiveMsgCallback(e) {
             let msg = JSON.parse(e.body);
-            this.chatMsgList.push(msg.data);
-            localStorage.setItem("chatMsgList", JSON.stringify(this.chatMsgList));
+            this.chatMsgList.push(msg);
+            this.$nextTick(() => {
+                this.$refs.msgListBox.scrollTop = this.$refs.msgListBox.scrollHeight;
+            });
+            if (document.hidden && !this.isMyMsg(msg)) {
+                new Notification(msg.fullName, {'body': msg.msg});
+            }
         },
-        receiveClientInfosCallback(e) {
-            console.log("receiveClientInfosCallback ", e);
+        receiveUserInfosCallback(e) {
+            
             let msg = JSON.parse(e.body);
-            this.clientInfos = msg;
+            this.userInfos = msg;
             this.onlineNum = msg.length;
         },
+        isMyMsg(item) {
+            let userId = item.userId;
+            if (userId == this.userInfo.userId) {
+                return true;
+            }
+            return false;
+        }
     }
 }
 </script>
