@@ -3,7 +3,7 @@
     <div class="box shadow">
         <div class="head border-bottom">
             <span class="full-name" title="点击修改昵称" @click="onFullNameClick">{{ getFullName() }}<span class="tip" v-if="!userInfo.fullName">（匿名用户请点击设置昵称）</span></span>
-            <span class="online">在线人数 2</span>
+            <span class="online" :title="onlineUserTipContent">在线人数 {{ onlineNum }}</span>
         </div>
         <div class="msg-list-box" ref="msgListBox">
             <div class="msg-item" :class="{mine: item.mineFlag}" v-for="(item, index) in chatMsgList" :key="`msgbox-${index}`">
@@ -26,7 +26,7 @@
             </div>
             <textarea v-model="chatMsgInput" @keydown.enter="handleKeyCode"></textarea>
             <div class="foot-row">
-                <button @click="sendMsg" type="button" class="btn btn-light">发送</button>
+                <button @click="sendMsg" type="button" class="btn btn-light send-btn">发送</button>
             </div>
         </div>
     </div>
@@ -54,12 +54,33 @@ export default {
                 userId: "",
             },
             chatMsgInput: "",
-            chatMsgList: undefined
+            chatMsgList: undefined,
+            onlineNum: 1,
+            clientInfos: []
+        }
+    },
+    computed: {
+        onlineUserTipContent() {
+            let ret = "";
+            let length = this.clientInfos.length;
+            if (length == 0) {
+                return undefined;
+            } else {
+                ret += this.clientInfos[0].clientName;
+            }
+            if (length == 1) {
+                return ret;
+            }
+            for(let i=1; i< length; i++) {
+                ret += "\n" + this.clientInfos[i].clientName;
+            }
+            return ret;
         }
     },
     mounted() {
         // localStorage.setItem("chatMsgList", "[]");
         this.initData();
+        this.initWebSocket();
         new PerfectScrollbar(this.$refs.msgListBox);
     },
     methods: {
@@ -75,17 +96,33 @@ export default {
                 }
                 localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
             }
-            WsService.init(this.userInfo.userId, this.receiveMsgCallback);
             let chatMsgListStr = localStorage.getItem("chatMsgList");
             let chatMsgList = JSON.parse(chatMsgListStr);
             if (!chatMsgList) {
                 chatMsgList = [];
             }
             this.chatMsgList = chatMsgList;
-            console.log("initData chatMsgList - ", chatMsgList)
         },
+        initWebSocket() {
+            WsService.init({
+                clientId: this.userInfo.userId,
+                clientName: this.userInfo.fullName,
+                subscribes: [{
+                    topic: `/user/${this.userInfo.userId}/msg`,
+                    callback: this.receiveMsgCallback
+                }, {
+                    topic: "/topic/clientInfos",
+                    callback: this.receiveClientInfosCallback
+                }]
+            });
+        },
+        
         onFullNameClick() {
             let fullName = prompt("请输入你的昵称");
+            if(!fullName || fullName.trim() == '') {
+                return;
+            }
+            fullName = fullName.trim();
             this.userInfo.fullName = fullName;
             // this.userInfo.userId = new Date().getTime();
             localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
@@ -145,7 +182,13 @@ export default {
             let msg = JSON.parse(e.body);
             this.chatMsgList.push(msg.data);
             localStorage.setItem("chatMsgList", JSON.stringify(this.chatMsgList));
-        }
+        },
+        receiveClientInfosCallback(e) {
+            console.log("receiveClientInfosCallback ", e);
+            let msg = JSON.parse(e.body);
+            this.clientInfos = msg;
+            this.onlineNum = msg.length;
+        },
     }
 }
 </script>
@@ -238,8 +281,8 @@ export default {
                 flex-flow: row-reverse;
 
                 .avatar-box {
-                    color: #FFF;
-                    background-color: #F47C39;
+                    color: #333333;
+                    background-color: #dbe2ef;
                     margin-left: 10px;
                     margin-right: 0px;
                 }
@@ -259,10 +302,6 @@ export default {
 
                         &:before{
                             display: none;
-                            content: none;
-                            border-width: 0px !important;
-                            
-                            border-color: transparent red transparent transparent;
                         }
 
                         &:after{
@@ -293,6 +332,12 @@ export default {
         .foot-row {
             display: flex;
             justify-content: flex-end;
+
+            .send-btn {
+                color: rgb(7, 193, 96);
+                width: 100px;
+                background-color: rgb(233, 233, 233);
+            }
         }
 
         textarea {

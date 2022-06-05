@@ -2,12 +2,13 @@ const { defineConfig } = require('@vue/cli-service');
 
 module.exports = defineConfig({
     transpileDependencies: true,
+    publicPath: '/chat/',
     devServer: {
         proxy: {
-            "/api": {
+            "/chatapi": {
                 target: "http://localhost:8083",
                 pathRewrite: {
-                    "^/api": "" // 需要rewrite的,
+                    "^/chatapi": "" // 需要rewrite的,
                 }
             }
         }
