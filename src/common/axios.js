@@ -2,7 +2,7 @@ import axios from 'axios';
 import qs from "qs";
 
 
-axios.defaults.baseURL = '/chatapi';
+axios.defaults.baseURL = '/apichat';
 axios.defaults.paramsSerializer = function(params) {
     return qs.stringify(params, { arrayFormat: "repeat" });
 };

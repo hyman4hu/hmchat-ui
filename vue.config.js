@@ -5,10 +5,10 @@ module.exports = defineConfig({
     publicPath: '/chat/',
     devServer: {
         proxy: {
-            "/chatapi": {
+            "/apichat": {
                 target: "http://localhost:8083",
                 pathRewrite: {
-                    "^/chatapi": "" // 需要rewrite的,
+                    "^/apichat": "" // 需要rewrite的,
                 }
             }
         }

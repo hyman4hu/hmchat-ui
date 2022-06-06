@@ -208,6 +208,7 @@ export default {
     height: 90vh;
     background-color: rgb(245, 245, 245);
     border: 1px rgba(0, 0, 0, 0.1) solid;
+    width: 100%;
 
     .msg-list-box {
         height: calc(90vh - 280px);
