@@ -1,11 +1,15 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '../views/Home'
+import { createRouter, createWebHashHistory } from 'vue-router';
+import Layout from "@/views/Layout";
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: '首页',
+    redirect: "/home",
+    component: Layout,
+    children: [
+      { path: '/home', component: () => import("@/views/Home"), name: '聊天' },
+    ]
   }
 ]
 

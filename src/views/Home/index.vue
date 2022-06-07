@@ -1,5 +1,5 @@
 <template>
-<div class="container ">
+<div class="container">
     <div class="box shadow">
         <div class="head border-bottom">
             <span class="full-name" title="点击修改昵称" @click="onFullNameClick">{{ getFullName() }}<span class="tip" v-if="!userInfo.fullName">（匿名用户请点击设置昵称）</span></span>

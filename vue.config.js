@@ -6,7 +6,8 @@ module.exports = defineConfig({
     devServer: {
         proxy: {
             "/apichat": {
-                target: "http://localhost:8083",
+                // target: "http://localhost:8083",
+                target: "http://hyman4hu.fun:8083",
                 pathRewrite: {
                     "^/apichat": "" // 需要rewrite的,
                 }
