@@ -1,6 +1,6 @@
 <template>
-<div class="container">
-    <div class="box shadow">
+<div>
+    <div class="box">
         <div class="head border-bottom">
             <span class="full-name" title="点击修改昵称" @click="onFullNameClick">{{ getFullName() }}<span class="tip" v-if="!userInfo.fullName">（匿名用户请点击设置昵称）</span></span>
             <span class="online" :title="onlineUserTipContent">在线人数 {{ onlineNum }}</span>
@@ -109,6 +109,9 @@ export default {
                 method: "get",
             }).then(res => {
                 this.chatMsgList = res.data.data;
+                this.$nextTick(() => {
+                    this.$refs.msgListBox.scrollTop = this.$refs.msgListBox.scrollHeight;
+                });
             });
         },
         initWebSocket() {
@@ -205,13 +208,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .box {
-    height: 90vh;
-    background-color: rgb(245, 245, 245);
-    border: 1px rgba(0, 0, 0, 0.1) solid;
     width: 100%;
+    height: 100%;
 
     .msg-list-box {
-        height: calc(90vh - 280px);
+        height: calc(100% - 280px);
         position: relative;
         width: 100%;
         padding: 0 32px;
@@ -310,7 +311,7 @@ export default {
                     }
 
                     .msg {
-                        background-color: rgb(149, 246, 105);
+                        background-color: rgb(149, 236, 105);
 
                         &:before{
                             display: none;
