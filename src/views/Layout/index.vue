@@ -1,14 +1,19 @@
 <template>
     <div class="container">
         <div class="box shadow">
-            <div class="nav-box"></div>
+            <LeftNav class="nav-box" />
             <router-view class="router-view" />
         </div>
     </div>
 </template>
 <script>
+import LeftNav from "@/views/LeftNav";
+
 export default {
-    name: "LayoutView"
+    name: "LayoutView",
+    components: {
+        LeftNav
+    }
 }
 </script>
 
@@ -21,7 +26,6 @@ export default {
     display: flex;
 
     .nav-box {
-        background-color: rgb(46, 46, 46);
         flex: 0 0 60px;
     }
 
