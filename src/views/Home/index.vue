@@ -191,7 +191,6 @@ export default {
             }
         },
         receiveUserInfosCallback(e) {
-            
             let msg = JSON.parse(e.body);
             this.userInfos = msg;
             this.onlineNum = msg.length;
